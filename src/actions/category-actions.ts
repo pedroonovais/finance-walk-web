@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation"
+
 const API_URL = "http://localhost:8080/categories"
 
 export async function getCategories(){
@@ -20,5 +22,23 @@ export async function createCategory(initialValue: any, formData: FormData) {
         body: JSON.stringify(data)
     }
 
-    fetch(API_URL, options)
+    const response = await fetch(API_URL, options)
+
+    if(!response.ok) {
+        const json = await response.json()
+        const errors = json.errors
+        
+        return { 
+            valuees: {
+                name: formData.get("name"),
+                icon: formData.get("icon"),
+            },
+            errors: { 
+                name: errors.find(e => e.field === "name")?.defaultMessage, 
+                icon: errors.find(e => e.field === "icon")?.defaultMessage,
+            } 
+        }
+    }
+
+    redirect("/categories")
 }
